@@ -1,19 +1,28 @@
 package com.udacity.gradle.builditbigger;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
-import com.edwin.JokeProducer;
 import com.edwin.android.jokesdisplayer.ShowJokeActivity;
 import com.edwin.android.jokesdisplayer.ShowJokeFragment;
+import com.edwin.backend.myApi.MyApi;
+import com.google.api.client.extensions.android.http.AndroidHttp;
+import com.google.api.client.extensions.android.json.AndroidJsonFactory;
+import com.google.api.client.googleapis.services.AbstractGoogleClientRequest;
+import com.google.api.client.googleapis.services.GoogleClientRequestInitializer;
+
+import java.io.IOException;
 
 
 public class MainActivity extends AppCompatActivity {
+
+    public static final String TAG = MainActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,12 +54,44 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void tellJoke(View view) {
-        JokeProducer jokeProducer = new JokeProducer();
-        Intent activityToStart = new Intent(this, ShowJokeActivity.class);
-        activityToStart.putExtra(ShowJokeFragment.EXTRA_JOKE, jokeProducer.getJoke());
+//        JokeProducer jokeProducer = new JokeProducer();
+//        Intent activityToStart = new Intent(this, ShowJokeActivity.class);
+//        activityToStart.putExtra(ShowJokeFragment.EXTRA_JOKE, jokeProducer.getJoke());
 
-//        Toast.makeText(this, jokeProducer.getJoke(), Toast.LENGTH_SHORT).show();
-        startActivity(activityToStart);
+
+        new AsyncTask<Void, Void, String>() {
+
+            private MyApi apiService;
+
+            @Override
+            protected String doInBackground(Void... params) {
+                MyApi.Builder builder = new MyApi.Builder(AndroidHttp.newCompatibleTransport(),
+                        new AndroidJsonFactory(), null);
+                builder.setRootUrl("http://10.0.2.2:8080/_ah/api/")
+                        .setGoogleClientRequestInitializer(new GoogleClientRequestInitializer() {
+                            @Override
+                            public void initialize(AbstractGoogleClientRequest<?>
+                                                           abstractGoogleClientRequest) throws
+                                    IOException {
+                                abstractGoogleClientRequest.setDisableGZipContent(true);
+                            }
+                        });
+                apiService = builder.build();
+                try {
+                    return apiService.getJoke().execute().getData();
+                } catch (IOException e) {
+                    return e.getMessage();
+                }
+            }
+
+            @Override
+            protected void onPostExecute(String joke) {
+                Log.d(TAG, "Joke: " + joke);
+                Intent activityToStart = new Intent(MainActivity.this, ShowJokeActivity.class);
+                activityToStart.putExtra(ShowJokeFragment.EXTRA_JOKE, joke);
+                startActivity(activityToStart);
+            }
+        }.execute();
     }
 
 
