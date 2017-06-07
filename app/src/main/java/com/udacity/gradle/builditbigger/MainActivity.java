@@ -11,7 +11,7 @@ import android.view.View;
 
 import com.edwin.android.jokesdisplayer.ShowJokeActivity;
 import com.edwin.android.jokesdisplayer.ShowJokeFragment;
-import com.edwin.backend.myApi.MyApi;
+import com.edwin.backend.jokeApi.JokeApi;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.googleapis.services.AbstractGoogleClientRequest;
@@ -54,18 +54,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void tellJoke(View view) {
-//        JokeProducer jokeProducer = new JokeProducer();
-//        Intent activityToStart = new Intent(this, ShowJokeActivity.class);
-//        activityToStart.putExtra(ShowJokeFragment.EXTRA_JOKE, jokeProducer.getJoke());
-
 
         new AsyncTask<Void, Void, String>() {
 
-            private MyApi apiService;
+            private JokeApi apiService;
 
             @Override
             protected String doInBackground(Void... params) {
-                MyApi.Builder builder = new MyApi.Builder(AndroidHttp.newCompatibleTransport(),
+                JokeApi.Builder builder = new JokeApi.Builder(AndroidHttp.newCompatibleTransport(),
                         new AndroidJsonFactory(), null);
                 builder.setRootUrl("http://10.0.2.2:8080/_ah/api/")
                         .setGoogleClientRequestInitializer(new GoogleClientRequestInitializer() {
