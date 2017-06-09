@@ -18,23 +18,32 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    productFlavors {
+        free {
+            applicationIdSuffix ".free"
+        }
+
+        paid {
+            applicationIdSuffix ".full"
+        }
+    }
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
+        exclude group: 'com.google.code.findbugs'
     })
     compile 'com.android.support.test.espresso:espresso-idling-resource:2.2.2'
     compile project(":jokeprovider")
     compile project(":jokesdisplayer")
     compile 'com.android.support:appcompat-v7:25.3.1'
-    compile 'com.google.android.gms:play-services-ads:10.2.6'
-    compile 'com.google.code.findbugs:jsr305:2.0.1'
+    freeCompile 'com.google.android.gms:play-services-ads:11.0.0'
     compile project(path: ':jokes_backend', configuration: 'android-endpoints')
     compile ('com.google.api-client:google-api-client-android:1.22.0') {
         exclude module: 'httpclient'
     }
-
 
 }
