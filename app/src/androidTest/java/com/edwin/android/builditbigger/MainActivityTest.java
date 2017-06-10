@@ -7,6 +7,7 @@ import android.support.test.espresso.matcher.BoundedMatcher;
 import android.support.test.filters.LargeTest;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -20,10 +21,16 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.matcher.ViewMatchers.assertThat;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.core.AnyOf.anyOf;
 
 /**
  * Created by Edwin Ramirez Ventura on 6/7/2017.
@@ -33,48 +40,32 @@ import static android.support.test.espresso.matcher.ViewMatchers.withId;
 @LargeTest
 public class MainActivityTest {
 
+    public static final String TAG = MainActivityTest.class.getSimpleName();
     @Rule
     public ActivityTestRule<MainActivity> mActivityTestRule =
             new ActivityTestRule<>(MainActivity.class);
-    private IdlingResource mIdlingResource;
-
-    @Before
-    public void registerIdlingResource() {
-        MainActivity activity = mActivityTestRule.getActivity();
-        mIdlingResource = activity.getIdlingResource();
-        Espresso.registerIdlingResources(mIdlingResource);
-    }
 
     @Test
-    public void checkTellJokeButton() {
-        onView(withId(R.id.button_show_joke)).perform(click());
-        onView(withId(R.id.text_joke)).check(matches(MainActivityTest.isGreaterTextLengthTextView(0)));
+    public void checkTellJokeButton() throws InterruptedException {
+        final CountDownLatch signal = new CountDownLatch(1);
+        new ShowJokeAsyncTask(mActivityTestRule.getActivity(), new ShowJokeAsyncTask.ShowJokeListener() {
 
-    }
-
-    @After
-    public void unregisterIdlingResource() {
-        if (mIdlingResource != null) {
-            Espresso.unregisterIdlingResources(mIdlingResource);
-        }
-    }
-
-    @NonNull
-    public static Matcher<View> isGreaterTextLengthTextView(final int minLength) {
-
-        return new BoundedMatcher<View, TextView>(TextView.class) {
 
             @Override
-            public void describeTo(final Description description) {
-                description.appendText("Expect TextView's text length greater than "+ minLength);
-            }
+            public void onComplete(String jokeString) {
+                Log.d(TAG, "Joke: "+ jokeString);
+                assertThat(jokeString != null, is(true));
+                assertThat(jokeString.length() > 0, is(true));
 
-            @Override
-            public boolean matchesSafely(final TextView textView) {
-                int textViewLength = textView.getText().length();
-                return textViewLength > minLength;
+
+                signal.countDown();
             }
-        };
+        }).execute();
+
+        signal.await(10, TimeUnit.SECONDS);// wait for callback
+
     }
+
+
 
 }

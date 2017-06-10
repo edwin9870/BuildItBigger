@@ -22,10 +22,12 @@ android {
     productFlavors {
         free {
             applicationIdSuffix ".free"
+            buildConfigField 'boolean', 'IS_FREE_FLAVOR', 'true'
         }
 
         paid {
             applicationIdSuffix ".full"
+            buildConfigField 'boolean', 'IS_FREE_FLAVOR', 'false'
         }
     }
 }
