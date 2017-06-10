@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ProgressBar;
 
 import com.edwin.android.jokesdisplayer.ShowJokeActivity;
 import com.edwin.android.jokesdisplayer.ShowJokeFragment;
@@ -26,6 +27,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
 
     private static final String TAG = MainActivityFragment.class.getSimpleName();
     private InterstitialAd mInterstitialAd;
+    private ProgressBar mProgressBar;
 
     public MainActivityFragment() {
     }
@@ -36,6 +38,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         View root = inflater.inflate(R.layout.fragment_main, container, false);
 
         Button showJokeButton = (Button) root.findViewById(R.id.button_show_joke);
+        mProgressBar = (ProgressBar) root.findViewById(R.id.progress_bar_loading_indicator);
         showJokeButton.setOnClickListener(this);
 
         AdView mAdView = (AdView) root.findViewById(R.id.adView);
@@ -66,6 +69,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
                 Log.d(TAG, "Showing joke activity");
                 ShowJokeAsyncTask showJokeAsyncTask = new ShowJokeAsyncTask(getActivity(), MainActivityFragment.this);
                 showJokeAsyncTask.execute();
+                mProgressBar.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -80,6 +84,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
 
     @Override
     public void onComplete(String jokeString) {
+        mProgressBar.setVisibility(View.INVISIBLE);
         Intent activityToStart = new Intent(getActivity(), ShowJokeActivity.class);
         activityToStart.putExtra(ShowJokeFragment.EXTRA_JOKE, jokeString);
         getActivity().startActivity(activityToStart);

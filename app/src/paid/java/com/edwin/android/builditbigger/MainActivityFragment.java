@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ProgressBar;
 
 import com.edwin.android.jokesdisplayer.ShowJokeActivity;
 import com.edwin.android.jokesdisplayer.ShowJokeFragment;
@@ -23,8 +24,7 @@ import static android.content.ContentValues.TAG;
 public class MainActivityFragment extends Fragment implements View.OnClickListener,
         ShowJokeAsyncTask.ShowJokeListener {
 
-    @Nullable
-    private SimpleIdlingResource mIdlingResource;
+    private ProgressBar mProgressBar;
 
     public MainActivityFragment() {
     }
@@ -35,6 +35,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         View root = inflater.inflate(R.layout.fragment_main, container, false);
 
         Button showJokeButton = (Button) root.findViewById(R.id.button_show_joke);
+        mProgressBar = (ProgressBar) root.findViewById(R.id.progress_bar_loading_indicator);
         showJokeButton.setOnClickListener(this);
 
         return root;
@@ -46,12 +47,14 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
 
         ShowJokeAsyncTask showJokeAsyncTask = new ShowJokeAsyncTask(getActivity(),  MainActivityFragment.this);
         showJokeAsyncTask.execute();
+        mProgressBar.setVisibility(View.VISIBLE);
 
     }
 
 
     @Override
     public void onComplete(String jokeString) {
+        mProgressBar.setVisibility(View.INVISIBLE);
         Intent activityToStart = new Intent(getActivity(), ShowJokeActivity.class);
         activityToStart.putExtra(ShowJokeFragment.EXTRA_JOKE, jokeString);
         getActivity().startActivity(activityToStart);
