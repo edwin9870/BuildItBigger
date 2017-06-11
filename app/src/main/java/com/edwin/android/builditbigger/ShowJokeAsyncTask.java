@@ -69,9 +69,7 @@ public class ShowJokeAsyncTask extends AsyncTask<Void, Void, String> {
         }
 
         mShowJokeListener.onComplete(joke);
-        Intent activityToStart = new Intent(mContext, ShowJokeActivity.class);
-        activityToStart.putExtra(ShowJokeFragment.EXTRA_JOKE, joke);
-        mContext.startActivity(activityToStart);
+
     }
 
     interface ShowJokeListener {
