@@ -32,6 +32,7 @@ android {
     }
 }
 
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
@@ -44,8 +45,32 @@ dependencies {
     compile 'com.android.support:appcompat-v7:25.3.1'
     freeCompile 'com.google.android.gms:play-services-ads:11.0.0'
     compile project(path: ':jokes_backend', configuration: 'android-endpoints')
-    compile ('com.google.api-client:google-api-client-android:1.22.0') {
+    compile('com.google.api-client:google-api-client-android:1.22.0') {
         exclude module: 'httpclient'
     }
 
 }
+
+task runAndroidTest{
+    dependsOn "connectedAndroidTest"
+}
+
+
+Task appEngineRun = tasks.getByPath(":jokes_backend:appengineRun")
+Task appEngineStop = tasks.getByPath(":jokes_backend:appengineStop")
+
+task fullTest {
+    dependsOn appEngineRun
+    dependsOn appEngineStop
+    dependsOn "runAndroidTest"
+    doLast {
+        println "Full test executed!"
+    }
+}
+
+runAndroidTest.mustRunAfter appEngineRun
+appEngineStop.mustRunAfter runAndroidTest
+
+
+
+

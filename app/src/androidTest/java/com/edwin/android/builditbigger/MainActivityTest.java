@@ -23,6 +23,7 @@ import org.junit.runner.RunWith;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
@@ -46,23 +47,24 @@ public class MainActivityTest {
             new ActivityTestRule<>(MainActivity.class);
 
     @Test
-    public void checkTellJokeButton() throws InterruptedException {
+    public void retrieveJoke() throws InterruptedException, TimeoutException {
         final CountDownLatch signal = new CountDownLatch(1);
         new ShowJokeAsyncTask(mActivityTestRule.getActivity(), new ShowJokeAsyncTask.ShowJokeListener() {
 
 
             @Override
-            public void onComplete(String jokeString) {
-                Log.d(TAG, "Joke: "+ jokeString);
-                assertThat(jokeString != null, is(true));
-                assertThat(jokeString.length() > 0, is(true));
-
-
+            public void onComplete(String joke) {
+                Log.d(TAG, "Joke: "+ joke);
+                assertThat(joke != null, is(true));
+                assertThat(joke.length() > 0, is(true));
                 signal.countDown();
             }
         }).execute();
 
-        signal.await(10, TimeUnit.SECONDS);// wait for callback
+        boolean isCallTimeout = signal.await(10, TimeUnit.SECONDS);
+        if(!isCallTimeout) {
+            throw new TimeoutException();
+        }
 
     }
 
