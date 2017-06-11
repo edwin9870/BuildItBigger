@@ -40,15 +40,3 @@ appengine {
         getDiscoveryDocsOnBuild = true
     }
 }
-
-
-
-//println "Taskname: ${project.tasks.getByName("appengineRun").name}"
-
-task runAppServer {
-    dependsOn "appengineRun"
-}
-
-task stopAppServer {
-    dependsOn "appengineStop"
-}
